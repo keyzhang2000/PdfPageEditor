@@ -32,12 +32,13 @@ class PageInsertMixin:
         self.render_timer.start()
         self.list.scrollToItem(self.list.item(row))
 
-    def insert_pdf(self, after=True, paths=None):
+    def insert_pdf(self, after=True, paths=None, row=None):
         if not self.docs:
             return self.open_file()
         if paths is None:
             paths, _ = QFileDialog.getOpenFileNames(self, tr("dlg.pick_insert"), "", "PDF (*.pdf)")
-        row = self.insertion_row(after)
+        if row is None:
+            row = self.insertion_row(after)
         entries = []
         for p in paths:
             try:

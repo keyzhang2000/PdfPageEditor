@@ -46,6 +46,7 @@ class MainWindow(
         load_saved_language()
 
         self.list = PageList(self._list_event)
+        self.list.files_dropped.connect(self.drop_pdfs)
         self.list.itemSelectionChanged.connect(self.update_preview)
         self.list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.list.customContextMenuRequested.connect(self.context_menu)

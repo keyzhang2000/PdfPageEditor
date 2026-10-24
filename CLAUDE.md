@@ -60,6 +60,7 @@ App Windows chỉnh sửa trang PDF (xóa, thêm, sắp xếp, xoay) với giao 
 - [x] Tái cấu trúc: tách `app.py` thành `main.py` + package `pdfeditor/` (mỗi chức năng một file mixin), giữ nguyên hành vi; test và bench vẫn qua, pyflakes sạch. Sửa `build_exe.bat` (dòng `activate` bị hỏng) và đổi `run.bat`/`build_exe.bat` sang `main.py`.
 - [x] Tách 3 thư mục: `backend/` (logic PDF thuần, không Qt), `frontend/` (giao diện, `pdfeditor/` cũ được đổi tên), `tests/`. Chuyển logic khỏi các mixin sang backend (`entries`, `pdf_io`, `naming`). Ba file test cũ ở thư mục gốc không còn trên đĩa, nên viết lại gọn thành `test_backend.py` + `test_frontend.py`; tất cả qua, pyflakes sạch, bench 500 trang vẫn xóa ~0.04s / lưu ~0.09s.
 - [x] Đa ngôn ngữ: Tiếng Việt / English / 繁體中文, menu "Ngôn ngữ" đổi ngay không cần khởi động lại, nhớ lựa chọn lần sau (QSettings). Đưa toàn bộ chuỗi giao diện/hộp thoại/lỗi sang `tr()`; backend ném `PasswordProtectedError` thay vì chuỗi tiếng Việt. Hộp thoại xác nhận chưa lưu dùng nút Có/Không theo ngôn ngữ đã chọn. `test_i18n.py` qua.
+- [x] Kéo file PDF từ Explorer: thả lên lưới thumbnail thì chèn đúng vị trí dưới con trỏ (vạch xanh chỉ chỗ thả, tự cuộn gần mép, bỏ qua file không phải PDF); thả chỗ khác trong cửa sổ thì chèn cuối; chưa mở file nào thì mở file đầu. Logic ở `PageList` (tín hiệu `files_dropped`) + `FileDropMixin.drop_pdfs`; `viewport().setAcceptDrops(True)` là bắt buộc. Test trong `test_frontend.py`.
 
 ### Chưa làm / ý tưởng
 - Chưa thử giao diện thật bằng tay (kéo-thả thumbnail chỉ mới viết, chưa kiểm tra trực quan).

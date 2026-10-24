@@ -118,3 +118,26 @@ assert order() == b2 and not L._dragging
 QTest.mouseClick(vp, Qt.LeftButton, Qt.NoModifier, c(2))   # click thường không di chuyển
 assert order() == b2
 print("kéo/dời trang OK")
+
+# ----- kéo file PDF từ Explorer: thả vào đúng vị trí dưới con trỏ -----
+from PySide6.QtCore import QMimeData, QPoint, QPointF, QUrl
+from PySide6.QtGui import QDragEnterEvent, QDropEvent
+
+mime = QMimeData()
+mime.setUrls([QUrl.fromLocalFile(b), QUrl.fromLocalFile(os.path.join(d, "x.txt"))])
+n0 = L.count()
+L.scrollToTop(); qa.processEvents()
+pos = L.visualItemRect(L.item(1)).center() - QPoint(10, 0)    # nửa trái trang 2 → chèn tại hàng 1
+vp = L.viewport()
+en = QDragEnterEvent(pos, Qt.CopyAction, mime, Qt.LeftButton, Qt.NoModifier)
+qa.sendEvent(vp, en)
+assert en.isAccepted() and L._file_drag and L._drop_row == 1
+qa.sendEvent(vp, QDropEvent(QPointF(pos), Qt.CopyAction, mime, Qt.LeftButton, Qt.NoModifier))
+assert L.count() == n0 + 2 and not L._file_drag, L.count()
+assert [L.item(r).data(Qt.UserRole)["src"] for r in (1, 2)] == [len(w.docs) - 1] * 2
+
+txt = QMimeData(); txt.setUrls([QUrl.fromLocalFile(os.path.join(d, "x.txt"))])   # không phải PDF → từ chối
+en = QDragEnterEvent(pos, Qt.CopyAction, txt, Qt.LeftButton, Qt.NoModifier)
+qa.sendEvent(vp, en)
+assert not en.isAccepted()
+print("kéo file từ Explorer OK")

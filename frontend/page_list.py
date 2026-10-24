@@ -1,11 +1,13 @@
 """Lưới thumbnail: chọn trang và kéo chuột để đổi vị trí."""
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import QAbstractItemView, QApplication, QListView, QListWidget
 
 
 class PageList(QListWidget):
     """Lưới thumbnail; nhấn giữ chuột trên trang rồi kéo để đổi vị trí (vạch xanh chỉ chỗ thả)."""
+
+    files_dropped = Signal(list, int)   # (đường dẫn PDF, vị trí chèn) khi kéo file từ Explorer vào
 
     def __init__(self, on_changed):
         super().__init__()
@@ -20,7 +22,8 @@ class PageList(QListWidget):
         self.setMovement(QListView.Static)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.setDragEnabled(False)   # tự xử lý kéo bằng sự kiện chuột
-        self.setAcceptDrops(False)   # file PDF kéo từ ngoài vào do cửa sổ chính xử lý
+        self.viewport().setAcceptDrops(True)   # nhận file PDF kéo từ Explorer (sự kiện đến viewport)
+        self._file_drag = False
         self.setSpacing(10)
         self.setWordWrap(True)
         self.setUniformItemSizes(False)
@@ -89,6 +92,52 @@ class PageList(QListWidget):
         self._press_item = None
         super().mouseReleaseEvent(ev)
 
+    # ----- kéo file PDF từ Explorer vào -----
+    @staticmethod
+    def pdf_paths(mime):
+        return [u.toLocalFile() for u in mime.urls() if u.toLocalFile().lower().endswith(".pdf")]
+
+    def dragEnterEvent(self, ev):
+        if ev.mimeData().hasUrls() and self.pdf_paths(ev.mimeData()):
+            self._file_drag = True
+            self._cursor_pos = ev.position().toPoint()
+            self._update_drop_row()
+            ev.acceptProposedAction()
+        else:
+            ev.ignore()
+
+    def dragMoveEvent(self, ev):
+        if not self._file_drag:
+            return ev.ignore()
+        self._cursor_pos = ev.position().toPoint()
+        self._update_drop_row()
+        self._autoscroll_file_drag()
+        ev.acceptProposedAction()
+
+    def dragLeaveEvent(self, ev):
+        self._end_file_drag()
+
+    def dropEvent(self, ev):
+        paths = self.pdf_paths(ev.mimeData())
+        row = self.drop_row_at(ev.position().toPoint())
+        self._end_file_drag()
+        if paths:
+            ev.acceptProposedAction()
+            self.files_dropped.emit(paths, row)
+
+    def _end_file_drag(self):
+        self._file_drag = False
+        self._drop_row = None
+        self.viewport().update()
+
+    def _autoscroll_file_drag(self):
+        y, h, bar = self._cursor_pos.y(), self.viewport().height(), self.verticalScrollBar()
+        edge = 40
+        if y < edge:
+            bar.setValue(bar.value() - 15)
+        elif y > h - edge:
+            bar.setValue(bar.value() + 15)
+
     def keyPressEvent(self, ev):
         if ev.key() == Qt.Key_Escape and self._dragging:
             self._end_drag()
@@ -124,7 +173,7 @@ class PageList(QListWidget):
 
     def paintEvent(self, ev):
         super().paintEvent(ev)
-        if not self._dragging:
+        if not (self._dragging or self._file_drag):
             return
         p = QPainter(self.viewport())
         r = self._drop_row
@@ -138,7 +187,7 @@ class PageList(QListWidget):
             p.setPen(Qt.NoPen)
             p.setBrush(QColor("#0078d4"))
             p.drawRect(x - 1, rect.top(), 3, rect.height())
-        if self._press_item is not None and self._cursor_pos is not None:
+        if self._dragging and self._press_item is not None and self._cursor_pos is not None:
             pm = self._press_item.icon().pixmap(self.iconSize())
             p.setOpacity(0.6)
             p.drawPixmap(self._cursor_pos - pm.rect().center(), pm)
