@@ -51,7 +51,7 @@ for code, file_menu, open_text in (("en", "File", "Open"), ("zh_TW", "檔案", "
     assert w.preview.text() == i18n.tr("preview.empty")
     # không có hai action cùng phím tắt đang hoạt động (sẽ gây "ambiguous shortcut")
     keys = [a.shortcut().toString() for a in w.findChildren(QAction)
-            if a.shortcut().toString() and not a.parent() is None and a in w._actions]
+            if a.shortcut().toString() and not a.parent() is None and a in [t[0] for t in w._actions]]
     assert len(keys) == len(set(keys)), keys
     checked = [a.text() for a in w.menuBar().actions()[-1].menu().actions() if a.isChecked()]
     assert checked == [i18n.LANGUAGES[code][0]], checked

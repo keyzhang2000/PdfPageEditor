@@ -1,4 +1,4 @@
-"""Lưu / Lưu thành (ghi ở luồng nền, tên gợi ý có đuôi _modify_<ngày>)."""
+"""Lưu thành tệp mới (không ghi đè file gốc; ghi ở luồng nền, tên gợi ý có đuôi _modify_<ngày>)."""
 import os
 
 from PySide6.QtCore import Qt
@@ -16,11 +16,6 @@ from ..save_worker import SaveWorker
 
 
 class FileSaveMixin:
-    def save(self):
-        if not self.path:
-            return self.save_as()
-        self._write(self.path)
-
     def save_as(self):
         if not self.docs:
             return
@@ -76,6 +71,7 @@ class FileSaveMixin:
         self.undo_stack.clear()
         self.redo_stack.clear()
         self.thumb_cache.clear()
+        self.clear_page_clipboard()
         for i, e in enumerate(pdf_entries(0, self.list.count())):
             self.list.item(i).setData(Qt.UserRole, e)
         self.dirty = False

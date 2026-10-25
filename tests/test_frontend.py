@@ -13,6 +13,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 
+from frontend import i18n
 from frontend.main_window import MainWindow
 
 
@@ -59,6 +60,32 @@ r = fitz.open(a)
 assert [p.get_text().strip() for p in r] == ["", "A1", "A3", "A4", "B1", "B2", "A5"]
 assert r[1].rotation == 90
 print("luồng chính OK")
+
+# ---- sao chép / dán trang ----
+w = MainWindow()
+w.load_pdf(b)                                          # B1, B2
+w.list.item(0).setSelected(True)
+w.copy_pages()
+w.list.clearSelection(); w.list.item(1).setSelected(True)
+w.paste_pages()                                        # dán sau B2
+assert w.list.count() == 3 and w.docs[0].page_count == 2
+w.paste_pages()                                        # dán tiếp sau bản vừa dán (đang được chọn)
+assert w.list.count() == 4
+w._write(os.path.join(d, "pasted.pdf")); wait_saved(w)
+assert [p.get_text().strip() for p in fitz.open(os.path.join(d, "pasted.pdf"))] == ["B1", "B2", "B1", "B1"]
+assert w.page_clipboard == []                          # lưu xong thì chỉ số nguồn đổi → xóa clipboard
+print("sao chép/dán OK")
+
+# ---- màn hình chính: đóng file, quay về trạng thái ban đầu ----
+w = MainWindow()
+w.load_pdf(a)
+w.go_home()
+assert w.docs == [] and w.path is None and w.list.count() == 0 and not w.dirty
+assert w.preview.text() == i18n.tr("preview.empty")
+w.go_home()                                            # đã ở màn hình chính: không lỗi
+w.load_pdf(a)
+assert w.list.count() == 7                             # mở lại bình thường
+print("màn hình chính OK")
 
 # ---- kéo / dời trang ----
 w = MainWindow(); w.resize(900, 600); w.show()

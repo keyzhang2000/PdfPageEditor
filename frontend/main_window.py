@@ -9,6 +9,7 @@ from .features.file_drop import FileDropMixin
 from .features.file_open import FileOpenMixin
 from .features.file_save import FileSaveMixin
 from .features.history import HistoryMixin
+from .features.page_clipboard import PageClipboardMixin
 from .features.page_delete import PageDeleteMixin
 from .features.page_insert import PageInsertMixin
 from .features.page_model import PageModelMixin
@@ -24,7 +25,7 @@ from .page_list import PageList
 class MainWindow(
     UiSetupMixin, LanguageMixin, PageModelMixin, HistoryMixin, ThumbnailMixin, PreviewMixin,
     FileOpenMixin, FileSaveMixin, ExtractMixin, FileDropMixin,
-    PageDeleteMixin, PageInsertMixin, PageMoveMixin, PageRotateMixin,
+    PageDeleteMixin, PageInsertMixin, PageClipboardMixin, PageMoveMixin, PageRotateMixin,
     QMainWindow,
 ):
     def __init__(self):
@@ -42,7 +43,9 @@ class MainWindow(
         self.thumb_cache = {}
         self.pending = []       # item chờ render thumbnail
         self.saver = None
-        self._actions = []      # QAction đang dùng (dọn lại khi đổi ngôn ngữ)
+        self._actions = []      # (QAction, khóa, khóa tooltip, phím tắt) để đổi chữ tại chỗ
+        self.page_clipboard = []   # entry đã sao chép (Ctrl+C)
+        self._menus = []        # (QMenu, khóa tiêu đề)
         load_saved_language()
 
         self.list = PageList(self._list_event)

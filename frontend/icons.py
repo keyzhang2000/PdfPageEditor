@@ -7,12 +7,13 @@ from . import theme
 
 # Mỗi biểu tượng là các đường vẽ trong khung 24x24.
 PATHS = {
+    "home": "M3 11l9-8 9 8 M5 10v10h5v-6h4v6h5V10",
     "open": "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
-    "save": "M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M7 3v5h8V3 M7 21v-7h10v7",
     "saveas": "M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M7 3v5h8V3 M7 21v-7h6",
     "delete": "M4 7h16 M10 11v6 M14 11v6 M6 7l1 13h10l1-13 M9 7V4h6v3",
     "ins_pdf": "M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z M14 3v5h5 M12 12v6 M9 15h6",
     "ins_blank": "M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z M14 3v5h5",
+    "paste": "M9 4h6v3H9z M7 5H5v16h14V5h-2 M9 12h6 M9 16h6",
     "dup": "M8 8h12v12H8z M4 16V4h12",
     "rot_l": "M3 12a9 9 0 1 0 3-6.7 M3 4v5h5",
     "rot_r": "M21 12a9 9 0 1 1-3-6.7 M21 4v5h-5",

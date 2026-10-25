@@ -64,10 +64,13 @@ class ThumbnailMixin:
                 e = it.data(Qt.UserRole)
             except RuntimeError:  # item đã bị xóa
                 continue
-            pm = self.render_entry(e, self.thumb_scale)
-            ic = QIcon(pm)
-            ic.addPixmap(pm, QIcon.Selected)   # không phủ màu xanh lên ảnh khi chọn (đã có nền thẻ)
-            it.setIcon(ic)
+            self.set_thumbnail(it, self.render_entry(e, self.thumb_scale))
+
+    @staticmethod
+    def set_thumbnail(it, pm):
+        ic = QIcon(pm)
+        ic.addPixmap(pm, QIcon.Selected)   # không phủ màu xanh lên ảnh khi chọn (đã có nền thẻ)
+        it.setIcon(ic)
 
     def set_zoom(self, v):
         self.thumb_scale = v / 100

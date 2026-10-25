@@ -25,6 +25,26 @@ class FileOpenMixin:
         if path:
             self.load_pdf(path)
 
+    def go_home(self):
+        """Đóng file hiện tại, quay về màn hình chính (khung gợi ý mở / kéo-thả file)."""
+        if not self.docs or not self.confirm_discard():
+            return
+        self.render_timer.stop()
+        self.pending = []
+        for d in self.docs:
+            d.close()
+        self.docs = []
+        self.path = None
+        self.undo_stack.clear()
+        self.redo_stack.clear()
+        self.thumb_cache.clear()
+        self.clear_page_clipboard()
+        self.load_snapshot([])
+        self.preview.clear()
+        self.preview.setText(tr("preview.empty"))
+        self.dirty = False
+        self.update_status()
+
     def load_pdf(self, path):
         try:
             doc = open_pdf(path)
@@ -38,6 +58,7 @@ class FileOpenMixin:
         self.undo_stack.clear()
         self.redo_stack.clear()
         self.thumb_cache.clear()
+        self.clear_page_clipboard()
         self.load_snapshot(pdf_entries(0, len(doc)))
         self.dirty = False
         self.update_status()

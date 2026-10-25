@@ -8,8 +8,8 @@ STRINGS = {
     "toolbar.main": "Chính",
     "label.zoom": " Thu phóng: ",
     # hành động
+    "act.home": "Trang chủ",
     "act.open": "Mở",
-    "act.save": "Lưu",
     "act.saveas": "Lưu thành...",
     "act.quit": "Thoát",
     "act.delete": "Xóa trang",
@@ -22,6 +22,8 @@ STRINGS = {
     "act.move_l": "Dời lên trước",
     "act.move_r": "Dời ra sau",
     "act.move_to": "Chuyển đến vị trí...",
+    "act.copy": "Sao chép",
+    "act.paste": "Dán",
     "act.dup": "Nhân đôi",
     "act.extract": "Xuất trang chọn...",
     "act.undo": "Hoàn tác",
