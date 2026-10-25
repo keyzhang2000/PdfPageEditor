@@ -53,16 +53,22 @@ class MainWindow(
 
         self.preview = QLabel(tr("preview.empty"))
         self.preview.setAlignment(Qt.AlignCenter)
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setWidget(self.preview)
+        self.preview_scroll = QScrollArea()
+        self.preview_scroll.setWidgetResizable(True)
+        self.preview_scroll.setWidget(self.preview)
 
         split = QSplitter()
         split.addWidget(self.list)
-        split.addWidget(scroll)
+        split.addWidget(self.preview_scroll)
         split.setStretchFactor(0, 3)
         split.setStretchFactor(1, 2)
         self.setCentralWidget(split)
+        split.splitterMoved.connect(lambda *_: self.preview_timer.start())   # kéo thanh chia → vẽ lại vừa khung
+
+        self.preview_timer = QTimer(self)    # gộp nhiều lần đổi kích thước thành một lần vẽ lại
+        self.preview_timer.setSingleShot(True)
+        self.preview_timer.setInterval(60)
+        self.preview_timer.timeout.connect(self.update_preview)
 
         self.render_timer = QTimer(self)
         self.render_timer.setInterval(5)

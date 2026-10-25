@@ -48,9 +48,13 @@ class UiSetupMixin:
         e = m.addMenu(tr("menu.edit"))
         e.addActions([self.a_undo, self.a_redo, self.a_all])
         p = m.addMenu(tr("menu.page"))
-        p.addActions([self.a_delete, self.a_ins_pdf, self.a_ins_pdf_b, self.a_ins_blank,
-                      self.a_ins_blank_b, self.a_dup, self.a_move_l, self.a_move_r,
-                      self.a_move_to, self.a_rot_l, self.a_rot_r, self.a_extract])
+        p.addAction(self.a_delete)
+        p.addSeparator()
+        p.addActions([self.a_ins_pdf_b, self.a_ins_pdf, self.a_ins_blank_b, self.a_ins_blank, self.a_dup])
+        p.addSeparator()
+        p.addActions([self.a_move_l, self.a_move_r, self.a_move_to])
+        p.addSeparator()
+        p.addActions([self.a_rot_l, self.a_rot_r, self.a_extract])
         self.build_language_menu(m)
 
         tb = QToolBar(tr("toolbar.main"))
@@ -59,9 +63,8 @@ class UiSetupMixin:
         self.addToolBar(tb)
         tb.addActions([self.a_open, self.a_save, self.a_saveas])
         tb.addSeparator()
-        tb.addActions([self.a_delete, self.a_ins_pdf, self.a_ins_blank, self.a_dup,
-                       self.a_move_l, self.a_move_r, self.a_move_to,
-                       self.a_rot_l, self.a_rot_r])
+        # Thanh công cụ chỉ giữ thao tác hay dùng; còn lại có trong menu, chuột phải và phím tắt.
+        tb.addActions([self.a_delete, self.a_ins_pdf, self.a_rot_l, self.a_rot_r])
         tb.addSeparator()
         tb.addActions([self.a_undo, self.a_redo])
         tb.addSeparator()
@@ -76,6 +79,7 @@ class UiSetupMixin:
     def context_menu(self, pos):
         menu = QMenu(self)
         menu.addActions([self.a_delete, self.a_dup, self.a_rot_l, self.a_rot_r])
+        menu.addSeparator()
         menu.addActions([self.a_move_l, self.a_move_r, self.a_move_to])
         menu.addSeparator()
         menu.addActions([self.a_ins_pdf_b, self.a_ins_pdf, self.a_ins_blank_b, self.a_ins_blank])
