@@ -10,6 +10,7 @@ App Windows chỉnh sửa trang PDF (xóa, thêm, sắp xếp, xoay) với giao 
 - Chạy app: `run.bat` (hoặc `.venv\Scripts\python main.py [file.pdf]`)
 - Test (không hiện cửa sổ): `.venv\Scripts\python tests\test_backend.py` và `tests\test_frontend.py`
 - Đóng gói .exe: `build_exe.bat` → `dist\PdfPageEditor.exe`
+- File cài đặt + gỡ cài đặt: `build_installer.bat` → `dist\PdfPageEditor_Setup_<ver>.exe` (Inno Setup 6, cấu hình `installer/PdfPageEditor.iss`, icon `installer/app.ico` tạo bởi `installer/make_icon.py`)
 
 ## Cấu trúc (3 thư mục: backend / frontend / tests)
 - `main.py`: điểm vào, chỉ tạo `QApplication` + `MainWindow`.
@@ -63,6 +64,7 @@ App Windows chỉnh sửa trang PDF (xóa, thêm, sắp xếp, xoay) với giao 
 - [x] Đa ngôn ngữ: Tiếng Việt / English / 繁體中文, menu "Ngôn ngữ" đổi ngay không cần khởi động lại, nhớ lựa chọn lần sau (QSettings). Đưa toàn bộ chuỗi giao diện/hộp thoại/lỗi sang `tr()`; backend ném `PasswordProtectedError` thay vì chuỗi tiếng Việt. Hộp thoại xác nhận chưa lưu dùng nút Có/Không theo ngôn ngữ đã chọn. `test_i18n.py` qua.
 - [x] Kéo file PDF từ Explorer: thả lên lưới thumbnail thì chèn đúng vị trí dưới con trỏ (vạch xanh chỉ chỗ thả, tự cuộn gần mép, bỏ qua file không phải PDF); thả chỗ khác trong cửa sổ thì chèn cuối; chưa mở file nào thì mở file đầu. Logic ở `PageList` (tín hiệu `files_dropped`) + `FileDropMixin.drop_pdfs`; `viewport().setAcceptDrops(True)` là bắt buộc. Test trong `test_frontend.py`.
 - [x] Làm đẹp giao diện: `frontend/theme.py` (bảng màu sáng/tối theo hệ thống + stylesheet Fusion, gọi `apply_theme(app)` trong `main.py`), `frontend/icons.py` (biểu tượng SVG nội tuyến cho action, icon app), thẻ thumbnail bo góc có viền trang, khung gợi ý kéo-thả khi chưa có trang (khóa `list.empty`). `act(..., icon_name=)` gắn biểu tượng. Chưa xem được chữ thật vì ảnh chụp offscreen thiếu font.
+- [x] Tạo trình cài đặt bằng Inno Setup (`installer/`, `build_installer.bat`): cài per-user, lối tắt Start Menu/Desktop, tự có `unins000.exe` + mục Apps & features, gỡ xóa luôn thư mục cài và khóa QSettings. `build_exe.bat` thêm `--icon`. Đã thử cài/gỡ im lặng vào thư mục tạm: đúng. Giao diện wizard Inno đang là tiếng Anh.
 
 ### Chưa làm / ý tưởng
 - Chưa thử giao diện thật bằng tay (kéo-thả thumbnail chỉ mới viết, chưa kiểm tra trực quan).

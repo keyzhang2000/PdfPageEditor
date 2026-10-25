@@ -42,6 +42,16 @@ build_exe.bat
 
 Kết quả: `dist\PdfPageEditor.exe` (một file duy nhất, không hiện cửa sổ console). Script dùng PyInstaller và loại `pymupdf.layout`, `pymupdf4llm`, `onnxruntime` khỏi bản build, vì app không dùng và nếu gói thiếu dữ liệu của chúng thì `.exe` sẽ lỗi khi khởi động.
 
+## Tạo file cài đặt (có gỡ cài đặt)
+
+```bat
+build_installer.bat
+```
+
+Kết quả: `dist\PdfPageEditor_Setup_1.0.0.exe`. Script tự tạo icon (`installer\app.ico`), build `.exe` rồi đóng gói bằng [Inno Setup 6](https://jrsoftware.org/isinfo.php) (cài bằng `winget install JRSoftware.InnoSetup`). Cấu hình ở `installer\PdfPageEditor.iss`.
+
+File cài đặt đã gói sẵn Python và thư viện (không cần cài thêm gì trên máy đích), cài cho riêng người dùng hiện tại (không cần quyền quản trị; có thể chọn cài cho mọi người dùng), tạo lối tắt Start Menu, lối tắt Desktop (tùy chọn) và trình gỡ cài đặt `unins000.exe`, hiện trong Windows "Apps & features" và Start Menu. Gỡ cài đặt xóa cả thư mục cài và cài đặt ngôn ngữ của app.
+
 ## Kiểm thử
 
 ```bat
