@@ -1,9 +1,11 @@
 """Vẽ thumbnail (dần dần bằng timer), có cache và thu phóng."""
 import pymupdf as fitz
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QColor, QIcon, QImage, QPixmap
+from PySide6.QtGui import QColor, QIcon, QImage, QPainter, QPixmap
 
 from backend.entries import displayed_size, page_size
+
+from .. import theme
 
 
 class ThumbnailMixin:
@@ -13,7 +15,7 @@ class ThumbnailMixin:
     def placeholder(self, e):
         w, h = displayed_size(self.docs, e)
         pm = QPixmap(int(w * self.thumb_scale), int(h * self.thumb_scale))
-        pm.fill(QColor("#e8e8e8"))
+        pm.fill(QColor(theme.colors()["placeholder"]))
         return pm
 
     def render_entry(self, e, scale):
@@ -30,6 +32,10 @@ class ThumbnailMixin:
             pix = page.get_pixmap(matrix=mat, alpha=False)
             img = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format_RGB888)
             pm = QPixmap.fromImage(img.copy())
+        p = QPainter(pm)   # viền mảnh để trang trắng không chìm vào nền
+        p.setPen(QColor(theme.colors()["page_border"]))
+        p.drawRect(0, 0, pm.width() - 1, pm.height() - 1)
+        p.end()
         if len(self.thumb_cache) > 600:
             self.thumb_cache.clear()
         self.thumb_cache[key] = pm
@@ -58,7 +64,10 @@ class ThumbnailMixin:
                 e = it.data(Qt.UserRole)
             except RuntimeError:  # item đã bị xóa
                 continue
-            it.setIcon(QIcon(self.render_entry(e, self.thumb_scale)))
+            pm = self.render_entry(e, self.thumb_scale)
+            ic = QIcon(pm)
+            ic.addPixmap(pm, QIcon.Selected)   # không phủ màu xanh lên ảnh khi chọn (đã có nền thẻ)
+            it.setIcon(ic)
 
     def set_zoom(self, v):
         self.thumb_scale = v / 100

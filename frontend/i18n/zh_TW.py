@@ -28,6 +28,7 @@ STRINGS = {
     "tip.ins_pdf": "將其他 PDF 檔案的頁面插入到所選頁面之後",
     "tip.move_l": "將所選頁面往前移動一個位置",
     "tip.move_r": "將所選頁面往後移動一個位置",
+    "list.empty": "將 PDF 檔案拖放到此處\n或按 Ctrl+O 開啟",
     "preview.empty": "開啟 PDF 檔案以開始\n（或將檔案拖放到視窗中）",
     "status.no_file": "（尚未開啟檔案）",
     "status.counts": "共 {n} 頁 | 已選取 {sel} 頁",

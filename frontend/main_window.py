@@ -46,6 +46,7 @@ class MainWindow(
         load_saved_language()
 
         self.list = PageList(self._list_event)
+        self.list.empty_text = tr("list.empty")
         self.list.files_dropped.connect(self.drop_pdfs)
         self.list.itemSelectionChanged.connect(self.update_preview)
         self.list.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -53,6 +54,7 @@ class MainWindow(
 
         self.preview = QLabel(tr("preview.empty"))
         self.preview.setAlignment(Qt.AlignCenter)
+        self.preview.setStyleSheet("color: palette(mid); font-size: 14px;")
         self.preview_scroll = QScrollArea()
         self.preview_scroll.setWidgetResizable(True)
         self.preview_scroll.setWidget(self.preview)

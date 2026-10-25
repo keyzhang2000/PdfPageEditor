@@ -152,3 +152,13 @@ w.resize(500, 400); qa.processEvents(); time.sleep(0.2); qa.processEvents()
 pm2 = w.preview.pixmap()
 assert pm2.height() <= vpw.height() and pm2.width() < pm.width(), (pm2.size(), vpw.size())
 print("xem trước theo kích thước OK")
+
+# ----- thanh công cụ: cửa sổ hẹp thì chỉ còn biểu tượng, không mất nút -----
+w.resize(2200, 700); qa.processEvents()
+assert w.toolbar.toolButtonStyle() == Qt.ToolButtonTextBesideIcon
+w.resize(620, 700); qa.processEvents()
+assert w.toolbar.toolButtonStyle() == Qt.ToolButtonIconOnly
+w.change_language("en"); w.resize(2200, 700); qa.processEvents()      # đổi ngôn ngữ → tính lại bề rộng
+assert w.toolbar.toolButtonStyle() == Qt.ToolButtonTextBesideIcon
+w.change_language("vi")
+print("thanh công cụ co giãn OK")

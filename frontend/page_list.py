@@ -1,7 +1,9 @@
 """Lưới thumbnail: chọn trang và kéo chuột để đổi vị trí."""
-from PySide6.QtCore import Qt, QTimer, Signal
-from PySide6.QtGui import QColor, QPainter
+from PySide6.QtCore import QRectF, Qt, QTimer, Signal
+from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QAbstractItemView, QApplication, QListView, QListWidget
+
+from . import theme
 
 
 class PageList(QListWidget):
@@ -24,6 +26,7 @@ class PageList(QListWidget):
         self.setDragEnabled(False)   # tự xử lý kéo bằng sự kiện chuột
         self.viewport().setAcceptDrops(True)   # nhận file PDF kéo từ Explorer (sự kiện đến viewport)
         self._file_drag = False
+        self.empty_text = ""        # chữ gợi ý khi chưa có trang nào
         self.setSpacing(10)
         self.setWordWrap(True)
         self.setUniformItemSizes(False)
@@ -171,8 +174,25 @@ class PageList(QListWidget):
             return
         self._update_drop_row()
 
+    def _paint_empty_hint(self):
+        c = theme.colors()
+        p = QPainter(self.viewport())
+        p.setRenderHint(QPainter.Antialiasing)
+        active = self._file_drag
+        pen = QPen(QColor(c["accent"] if active else c["page_border"]), 2, Qt.DashLine)
+        p.setPen(pen)
+        p.setBrush(QColor(c["accent_soft"]) if active else Qt.NoBrush)
+        box = QRectF(self.viewport().rect()).adjusted(24, 24, -24, -24)
+        p.drawRoundedRect(box, 16, 16)
+        p.setPen(QColor(c["accent"] if active else c["muted"]))
+        p.drawText(box, Qt.AlignCenter | Qt.TextWordWrap, self.empty_text)
+        p.end()
+
     def paintEvent(self, ev):
         super().paintEvent(ev)
+        if self.count() == 0 and self.empty_text:
+            self._paint_empty_hint()
+            return
         if not (self._dragging or self._file_drag):
             return
         p = QPainter(self.viewport())
@@ -185,7 +205,7 @@ class PageList(QListWidget):
                 rect = self.visualItemRect(self.item(self.count() - 1))
                 x = rect.right() + self.spacing() // 2
             p.setPen(Qt.NoPen)
-            p.setBrush(QColor("#0078d4"))
+            p.setBrush(QColor(theme.colors()["accent"]))
             p.drawRect(x - 1, rect.top(), 3, rect.height())
         if self._dragging and self._press_item is not None and self._cursor_pos is not None:
             pm = self._press_item.icon().pixmap(self.iconSize())

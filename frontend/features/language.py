@@ -36,6 +36,8 @@ class LanguageMixin:
             tb.setParent(None)  # gỡ khỏi cửa sổ ngay, đối tượng được xóa sau
             tb.deleteLater()
         self.build_actions()
+        self.list.empty_text = tr("list.empty")
+        self.list.viewport().update()
         if not self.docs:
             self.preview.setText(tr("preview.empty"))
         self.update_status()

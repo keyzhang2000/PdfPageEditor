@@ -8,11 +8,15 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 
+from frontend.icons import app_icon
 from frontend.main_window import MainWindow
+from frontend.theme import apply_theme
 
 
 def main():
     app = QApplication(sys.argv)
+    apply_theme(app)
+    app.setWindowIcon(app_icon())
     w = MainWindow()
     w.show()
     if len(sys.argv) > 1 and os.path.isfile(sys.argv[1]):

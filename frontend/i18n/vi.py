@@ -31,6 +31,7 @@ STRINGS = {
     "tip.move_l": "Đưa trang đã chọn lùi một vị trí",
     "tip.move_r": "Đưa trang đã chọn tiến một vị trí",
     # giao diện chính
+    "list.empty": "Kéo-thả file PDF vào đây\nhoặc nhấn Ctrl+O để mở",
     "preview.empty": "Mở một file PDF để bắt đầu\n(hoặc kéo-thả file vào cửa sổ)",
     "status.no_file": "(chưa mở file)",
     "status.counts": "{n} trang | đã chọn {sel}",

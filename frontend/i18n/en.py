@@ -28,6 +28,7 @@ STRINGS = {
     "tip.ins_pdf": "Insert pages from another PDF after the selected page",
     "tip.move_l": "Move the selected pages one position earlier",
     "tip.move_r": "Move the selected pages one position later",
+    "list.empty": "Drop PDF files here\nor press Ctrl+O to open",
     "preview.empty": "Open a PDF file to get started\n(or drag and drop a file into the window)",
     "status.no_file": "(no file open)",
     "status.counts": "{n} pages | {sel} selected",

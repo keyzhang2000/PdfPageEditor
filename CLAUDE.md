@@ -28,6 +28,7 @@ App Windows chỉnh sửa trang PDF (xóa, thêm, sắp xếp, xoay) với giao 
     `file_open`, `file_save`, `extract`, `file_drop`, `page_delete`, `page_insert`, `page_move`, `page_rotate`,
     `language` (menu Ngôn ngữ, đổi ngay bằng `retranslate()`).
   - `i18n/`: `tr(khóa, **tham_số)`; mỗi ngôn ngữ một file từ điển (`vi.py` gốc/dự phòng, `en.py`, `zh_TW.py`); lựa chọn lưu bằng QSettings.
+  - `theme.py` (màu + stylesheet), `icons.py` (biểu tượng SVG).
   - `errors.py`: `error_text(ex)` dịch ngoại lệ backend (vd. PDF có mật khẩu).
 - `tests/`: `test_backend.py` (không cần Qt), `test_frontend.py` (luồng chính, kéo chuột, dời trang), `test_i18n.py` (đủ khóa/placeholder, đổi ngôn ngữ trực tiếp; dùng QSettings tạm), `bench.py` (đo tốc độ 500 trang).
 - **Chuỗi hiển thị không được viết cứng**: dùng `tr("khóa")` và thêm khóa vào cả 3 file trong `frontend/i18n/` (test_i18n sẽ báo nếu thiếu khóa/placeholder). **Thêm ngôn ngữ mới**: tạo file từ điển mới + thêm vào `LANGUAGES` trong `i18n/__init__.py`.
@@ -61,6 +62,7 @@ App Windows chỉnh sửa trang PDF (xóa, thêm, sắp xếp, xoay) với giao 
 - [x] Tách 3 thư mục: `backend/` (logic PDF thuần, không Qt), `frontend/` (giao diện, `pdfeditor/` cũ được đổi tên), `tests/`. Chuyển logic khỏi các mixin sang backend (`entries`, `pdf_io`, `naming`). Ba file test cũ ở thư mục gốc không còn trên đĩa, nên viết lại gọn thành `test_backend.py` + `test_frontend.py`; tất cả qua, pyflakes sạch, bench 500 trang vẫn xóa ~0.04s / lưu ~0.09s.
 - [x] Đa ngôn ngữ: Tiếng Việt / English / 繁體中文, menu "Ngôn ngữ" đổi ngay không cần khởi động lại, nhớ lựa chọn lần sau (QSettings). Đưa toàn bộ chuỗi giao diện/hộp thoại/lỗi sang `tr()`; backend ném `PasswordProtectedError` thay vì chuỗi tiếng Việt. Hộp thoại xác nhận chưa lưu dùng nút Có/Không theo ngôn ngữ đã chọn. `test_i18n.py` qua.
 - [x] Kéo file PDF từ Explorer: thả lên lưới thumbnail thì chèn đúng vị trí dưới con trỏ (vạch xanh chỉ chỗ thả, tự cuộn gần mép, bỏ qua file không phải PDF); thả chỗ khác trong cửa sổ thì chèn cuối; chưa mở file nào thì mở file đầu. Logic ở `PageList` (tín hiệu `files_dropped`) + `FileDropMixin.drop_pdfs`; `viewport().setAcceptDrops(True)` là bắt buộc. Test trong `test_frontend.py`.
+- [x] Làm đẹp giao diện: `frontend/theme.py` (bảng màu sáng/tối theo hệ thống + stylesheet Fusion, gọi `apply_theme(app)` trong `main.py`), `frontend/icons.py` (biểu tượng SVG nội tuyến cho action, icon app), thẻ thumbnail bo góc có viền trang, khung gợi ý kéo-thả khi chưa có trang (khóa `list.empty`). `act(..., icon_name=)` gắn biểu tượng. Chưa xem được chữ thật vì ảnh chụp offscreen thiếu font.
 
 ### Chưa làm / ý tưởng
 - Chưa thử giao diện thật bằng tay (kéo-thả thumbnail chỉ mới viết, chưa kiểm tra trực quan).
