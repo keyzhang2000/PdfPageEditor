@@ -87,6 +87,10 @@ class UiSetupMixin:
         p.addActions([self.a_move_l, self.a_move_r, self.a_move_to])
         p.addSeparator()
         p.addActions([self.a_rot_l, self.a_rot_r, self.a_extract])
+        v = self.add_menu(m, "menu.view")
+        v.addActions([self.act("act.zoom_in", lambda: self.zoom_preview(1), "Ctrl+=", icon_name="zoom_in"),
+                      self.act("act.zoom_out", lambda: self.zoom_preview(-1), "Ctrl+-", icon_name="zoom_out"),
+                      self.act("act.zoom_fit", self.reset_preview_zoom, "Ctrl+0", icon_name="zoom_fit")])
         self.build_language_menu(m)
 
         tb = QToolBar(tr("toolbar.main"))

@@ -189,3 +189,50 @@ w.change_language("en"); w.resize(2200, 700); qa.processEvents()      # đổi n
 assert w.toolbar.toolButtonStyle() == Qt.ToolButtonTextBesideIcon
 w.change_language("vi")
 print("thanh công cụ co giãn OK")
+
+# ----- thu phóng khu xem trước -----
+qa.processEvents(); time.sleep(0.2); qa.processEvents()
+w.reset_preview_zoom(); w.update_preview()
+base = w.preview.pixmap().width()
+w.zoom_preview(1)
+assert w.preview_zoom > 1 and w.preview.pixmap().width() > base, "phóng to xem trước"
+w.zoom_preview(-1); w.zoom_preview(-1)
+assert w.preview_zoom == 1.0, "không thu nhỏ hơn mức vừa khung"
+for _ in range(30):
+    w.zoom_preview(1)
+assert w.preview_zoom <= 8.0
+w.reset_preview_zoom()
+assert w.preview.pixmap().width() == base
+print("thu phóng xem trước OK")
+
+# ----- nhấn giữ con lăn + kéo để chỉnh vị trí xem -----
+from PySide6.QtCore import QEvent, QPoint, QPointF
+from PySide6.QtGui import QMouseEvent
+w.zoom_preview(1); w.zoom_preview(1); qa.processEvents()
+sv = w.preview_scroll.verticalScrollBar(); sv.setValue(0)
+vp = w.preview_scroll.viewport()
+QTest.mousePress(vp, Qt.MiddleButton, Qt.NoModifier, QPoint(100, 200))
+qa.sendEvent(vp, QMouseEvent(QEvent.MouseMove, QPointF(100, 100), QPointF(100, 100), Qt.NoButton, Qt.MiddleButton, Qt.NoModifier))
+QTest.mouseRelease(vp, Qt.MiddleButton, Qt.NoModifier, QPoint(100, 100))
+assert sv.value() > 0, "kéo con lăn phải cuộn khung xem"
+w.reset_preview_zoom()
+print("kéo con lăn OK")
+
+# ----- Ctrl+lăn: cộng dồn nấc nhỏ (touchpad), gộp lần vẽ, giữ điểm dưới con trỏ -----
+from PySide6.QtGui import QWheelEvent
+def wheel(dy, pos):
+    qa.sendEvent(w.preview_scroll.viewport(), QWheelEvent(QPointF(pos), QPointF(pos), QPoint(0, 0), QPoint(0, dy),
+                                                          Qt.NoButton, Qt.ControlModifier, Qt.NoScrollPhase, False))
+w.reset_preview_zoom(); qa.processEvents()
+for _ in range(4):
+    wheel(30, QPoint(50, 50))            # 4 x 30 = một nấc 120
+time.sleep(0.1); qa.processEvents()
+assert abs(w.preview_zoom - 1.25) < 1e-6, w.preview_zoom
+wheel(120, QPoint(50, 50)); wheel(120, QPoint(50, 50))   # hai nấc liền → một lần vẽ
+time.sleep(0.1); qa.processEvents()
+assert abs(w.preview_zoom - 1.25 ** 3) < 1e-3, w.preview_zoom
+lab, sc = w.preview, w.preview_scroll
+under = (50 - lab.x()) / lab.width()      # điểm dưới con trỏ vẫn gần (50, 50) của khung nhìn
+assert under < 0.25, under
+w.reset_preview_zoom()
+print("lăn chuột thu phóng OK")

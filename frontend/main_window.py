@@ -2,7 +2,7 @@
 from collections import deque
 
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import QLabel, QMainWindow, QScrollArea, QSplitter
+from PySide6.QtWidgets import QLabel, QMainWindow, QSplitter
 
 from .features.language import LanguageMixin
 from .features.extract import ExtractMixin
@@ -21,6 +21,7 @@ from .features.thumbnails import ThumbnailMixin
 from .features.ui_setup import UiSetupMixin
 from .i18n import load_saved_language, tr
 from .page_list import PageList
+from .preview_view import PreviewScroll
 
 
 class MainWindow(
@@ -39,6 +40,7 @@ class MainWindow(
         self.path = None        # file đang mở
         self.dirty = False
         self.thumb_scale = 0.25
+        self.preview_zoom = 1.0   # 1.0 = vừa khung
         self.undo_stack = []
         self.redo_stack = []
         self.thumb_cache = {}
@@ -60,7 +62,9 @@ class MainWindow(
         self.preview = QLabel(tr("preview.empty"))
         self.preview.setAlignment(Qt.AlignCenter)
         self.preview.setStyleSheet("color: palette(mid); font-size: 14px;")
-        self.preview_scroll = QScrollArea()
+        self.preview_scroll = PreviewScroll()
+        self.preview_scroll.zoom_requested.connect(self.zoom_preview)
+        self.preview_scroll.zoom_reset.connect(self.reset_preview_zoom)
         self.preview_scroll.setWidgetResizable(True)
         self.preview_scroll.setWidget(self.preview)
 
@@ -71,6 +75,12 @@ class MainWindow(
         split.setStretchFactor(1, 2)
         self.setCentralWidget(split)
         split.splitterMoved.connect(lambda *_: self.preview_timer.start())   # kéo thanh chia → vẽ lại vừa khung
+
+        self.zoom_timer = QTimer(self)       # gộp nhiều nấc lăn chuột thành một lần vẽ lại
+        self.zoom_timer.setSingleShot(True)
+        self.zoom_timer.setInterval(30)
+        self.zoom_timer.timeout.connect(self._apply_zoom)
+        self._zoom_anchor = None
 
         self.preview_timer = QTimer(self)    # gộp nhiều lần đổi kích thước thành một lần vẽ lại
         self.preview_timer.setSingleShot(True)
