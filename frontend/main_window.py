@@ -1,4 +1,5 @@
 """Cửa sổ chính: chỉ ghép các chức năng (frontend/features/) lại với nhau."""
+from collections import deque
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QLabel, QMainWindow, QScrollArea, QSplitter
@@ -41,7 +42,8 @@ class MainWindow(
         self.undo_stack = []
         self.redo_stack = []
         self.thumb_cache = {}
-        self.pending = []       # item chờ render thumbnail
+        self.thumb_cache_bytes = 0
+        self.pending = deque()  # item chờ render thumbnail
         self.saver = None
         self._actions = []      # (QAction, khóa, khóa tooltip, phím tắt) để đổi chữ tại chỗ
         self.page_clipboard = []   # entry đã sao chép (Ctrl+C)

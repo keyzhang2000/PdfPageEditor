@@ -30,14 +30,14 @@ class FileOpenMixin:
         if not self.docs or not self.confirm_discard():
             return
         self.render_timer.stop()
-        self.pending = []
+        self.pending.clear()
         for d in self.docs:
             d.close()
         self.docs = []
         self.path = None
         self.undo_stack.clear()
         self.redo_stack.clear()
-        self.thumb_cache.clear()
+        self.clear_thumb_cache()
         self.clear_page_clipboard()
         self.load_snapshot([])
         self.preview.clear()
@@ -57,7 +57,7 @@ class FileOpenMixin:
         self.path = path
         self.undo_stack.clear()
         self.redo_stack.clear()
-        self.thumb_cache.clear()
+        self.clear_thumb_cache()
         self.clear_page_clipboard()
         self.load_snapshot(pdf_entries(0, len(doc)))
         self.dirty = False

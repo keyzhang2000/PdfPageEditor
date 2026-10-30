@@ -1,4 +1,6 @@
 """Vẽ thumbnail (dần dần bằng timer), có cache và thu phóng."""
+from collections import deque
+
 import pymupdf as fitz
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QColor, QIcon, QImage, QPainter, QPixmap
@@ -6,6 +8,9 @@ from PySide6.QtGui import QColor, QIcon, QImage, QPainter, QPixmap
 from backend.entries import displayed_size, page_size
 
 from .. import theme
+
+
+CACHE_LIMIT_BYTES = 256 * 1024 * 1024
 
 
 class ThumbnailMixin:
@@ -36,13 +41,20 @@ class ThumbnailMixin:
         p.setPen(QColor(theme.colors()["page_border"]))
         p.drawRect(0, 0, pm.width() - 1, pm.height() - 1)
         p.end()
-        if len(self.thumb_cache) > 600:
+        # Giới hạn theo dung lượng ảnh (ảnh xem trước lớn hơn thumbnail rất nhiều), không chỉ theo số lượng.
+        self.thumb_cache_bytes += pm.width() * pm.height() * 4
+        if self.thumb_cache_bytes > CACHE_LIMIT_BYTES:
             self.thumb_cache.clear()
+            self.thumb_cache_bytes = pm.width() * pm.height() * 4
         self.thumb_cache[key] = pm
         return pm
 
+    def clear_thumb_cache(self):
+        self.thumb_cache.clear()
+        self.thumb_cache_bytes = 0
+
     def start_rendering(self):
-        self.pending = [self.list.item(i) for i in range(self.list.count())]
+        self.pending = deque(self.list.item(i) for i in range(self.list.count()))
         self.list.setIconSize(self.icon_size())
         self.render_timer.start()
 
@@ -59,7 +71,7 @@ class ThumbnailMixin:
             if not self.pending:
                 self.render_timer.stop()
                 return
-            it = self.pending.pop(0)
+            it = self.pending.popleft()
             try:
                 e = it.data(Qt.UserRole)
             except RuntimeError:  # item đã bị xóa

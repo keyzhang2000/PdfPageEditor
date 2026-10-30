@@ -28,7 +28,7 @@ class PageInsertMixin:
             self.list.insertItem(row + k, it)
             it.setSelected(True)
         self.renumber()
-        self.pending = [self.list.item(row + k) for k in range(len(entries))]
+        self.pending.extendleft(reversed([self.list.item(row + k) for k in range(len(entries))]))   # trang mới vẽ trước, không bỏ các trang đang chờ
         self.render_timer.start()
         self.list.scrollToItem(self.list.item(row))
 

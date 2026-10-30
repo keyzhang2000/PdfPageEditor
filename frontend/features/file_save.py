@@ -70,7 +70,7 @@ class FileSaveMixin:
         self.path = path
         self.undo_stack.clear()
         self.redo_stack.clear()
-        self.thumb_cache.clear()
+        self.clear_thumb_cache()
         self.clear_page_clipboard()
         for i, e in enumerate(pdf_entries(0, self.list.count())):
             self.list.item(i).setData(Qt.UserRole, e)
