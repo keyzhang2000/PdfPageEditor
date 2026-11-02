@@ -31,4 +31,5 @@ class PageModelMixin:
         n = self.list.count()
         sel = len(self.list.selectedItems())
         self.setWindowTitle(f"{'*' if self.dirty else ''}{name} - PDF Page Editor")
+        self.update_tab_title()
         self.statusBar().showMessage(tr("status.counts", n=n, sel=sel))

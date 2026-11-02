@@ -62,8 +62,10 @@ assert r[1].rotation == 90
 print("luồng chính OK")
 
 # ---- sao chép / dán trang ----
+b2 = os.path.join(d, "b2.pdf")
+make(b2, 2, "B")
 w = MainWindow()
-w.load_pdf(b)                                          # B1, B2
+w.load_pdf(b2)                                         # B1, B2
 w.list.item(0).setSelected(True)
 w.copy_pages()
 w.list.clearSelection(); w.list.item(1).setSelected(True)
@@ -71,10 +73,28 @@ w.paste_pages()                                        # dán sau B2
 assert w.list.count() == 3 and w.docs[0].page_count == 2
 w.paste_pages()                                        # dán tiếp sau bản vừa dán (đang được chọn)
 assert w.list.count() == 4
-w._write(os.path.join(d, "pasted.pdf")); wait_saved(w)
+w._write(os.path.join(d, "pasted.pdf")); wait_saved(w)  # lưu sang path khác: clipboard (trỏ tới b2) vẫn còn
 assert [p.get_text().strip() for p in fitz.open(os.path.join(d, "pasted.pdf"))] == ["B1", "B2", "B1", "B1"]
-assert w.page_clipboard == []                          # lưu xong thì chỉ số nguồn đổi → xóa clipboard
+assert len(w.page_clipboard) == 1
+w._write(b2); wait_saved(w)                            # lưu đè đúng file nguồn: clipboard trỏ tới nó hết hiệu lực
+assert w.page_clipboard == []
 print("sao chép/dán OK")
+
+# ---- dán trang sang tab khác ----
+a2, b3 = os.path.join(d, "a2.pdf"), os.path.join(d, "b3.pdf")
+make(a2, 5, "A"); make(b3, 2, "B")
+w = MainWindow()
+w.open_pdf_tab(a2); w.open_pdf_tab(b3)                 # tab B đang hiện (A1..A5, B1, B2)
+w.list.item(0).setSelected(True)                       # B1
+w.copy_pages()
+w.tabbar.setCurrentIndex(0)                             # sang tab A
+assert w.path == a2 and len(w.docs) == 1
+w.list.item(0).setSelected(True)
+w.paste_pages()                                         # A1, B1, A2..A5 — mở lại b3 làm nguồn mới trong tab A
+assert w.list.count() == 6 and len(w.docs) == 2
+texts = [w.docs[e["src"]][e["page"]].get_text().strip() for e in w.snapshot()]
+assert texts == ["A1", "B1", "A2", "A3", "A4", "A5"], texts
+print("dán sang tab khác OK")
 
 # ---- màn hình chính: đóng file, quay về trạng thái ban đầu ----
 w = MainWindow()
@@ -86,6 +106,32 @@ w.go_home()                                            # đã ở màn hình ch�
 w.load_pdf(a)
 assert w.list.count() == 7                             # mở lại bình thường
 print("màn hình chính OK")
+
+# ---- tab: nhiều file, mỗi file một tab, trạng thái riêng ----
+w = MainWindow()
+w.open_pdf_tab(a); w.open_pdf_tab(b)
+assert w.tabbar.count() == 2 and w.tabbar.currentIndex() == 1 and w.list.count() == 2
+w.list.item(0).setSelected(True); w.delete_selected()   # sửa tab B → chưa lưu
+assert w.dirty and w.tabbar.tabText(1).startswith("*") and w.list.count() == 1
+w.tabbar.setCurrentIndex(0)
+assert w.path == a and w.list.count() == 7 and not w.dirty and w.undo_stack == []
+w.tabbar.setCurrentIndex(1)
+assert w.path == b and w.list.count() == 1 and w.dirty and len(w.undo_stack) == 1
+w.undo(); assert w.list.count() == 2
+w.open_pdf_tab(a)                                       # đã mở: chuyển tab, không tạo thêm
+assert w.tabbar.count() == 2 and w.path == a
+w.tabbar.setCurrentIndex(1); w.delete_selected()
+assert w._all_dirty()
+w.confirm_discard = lambda dirty=None: False
+w.close_tab(1); assert w.tabbar.count() == 2           # không đồng ý thì giữ tab
+w.confirm_discard = lambda dirty=None: True
+w.close_tab(1)
+assert w.tabbar.count() == 1 and w.path == a and w.list.count() == 7
+w.close_tab(0)
+assert w.docs == [] and w.path is None and w.list.count() == 0 and not w.tab_strip.isVisible()
+w.drop_pdfs([a, b], None)                               # màn hình chính: mỗi file một tab
+assert w.tabbar.count() == 2
+print("tab OK")
 
 # ---- kéo / dời trang ----
 w = MainWindow(); w.resize(900, 600); w.show()

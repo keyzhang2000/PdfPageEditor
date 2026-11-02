@@ -6,11 +6,13 @@ LIGHT = {
     "bg": "#f3f4f6", "panel": "#ffffff", "text": "#1f2937", "muted": "#6b7280", "border": "#e5e7eb",
     "accent": "#2563eb", "accent_soft": "#dbeafe", "hover": "#e5e7eb", "icon": "#374151",
     "page_border": "#cbd5e1", "placeholder": "#e5e7eb",
+    "tab_strip": "#dfe3e8", "tab_sep": "#c4cad3",
 }
 DARK = {
     "bg": "#1b1d21", "panel": "#25282e", "text": "#e5e7eb", "muted": "#9ca3af", "border": "#33373f",
     "accent": "#3b82f6", "accent_soft": "#1e3a6e", "hover": "#32363e", "icon": "#d1d5db",
     "page_border": "#4b5563", "placeholder": "#32363e",
+    "tab_strip": "#111317", "tab_sep": "#3a3f48",
 }
 
 _current = LIGHT
@@ -45,6 +47,20 @@ QToolButton {{ padding: 6px 10px; border-radius: 8px; border: 1px solid transpar
 QToolButton:hover {{ background: {c['hover']}; }}
 QToolButton:pressed {{ background: {c['accent_soft']}; }}
 QToolButton:disabled {{ color: {c['muted']}; }}
+
+/* Thanh tab kiểu Chrome: dải tab tối hơn nền, tab đang chọn sáng bằng vùng nội dung bên dưới và liền mạch với nó. */
+QWidget#tabstrip {{ background: {c['tab_strip']}; }}
+QTabBar {{ background: transparent; border: none; qproperty-drawBase: 0; }}
+QTabBar::tab {{ background: transparent; color: {c['muted']}; padding: 7px 8px; margin: 6px 0 0 0;
+               min-width: 120px; max-width: 240px; border: 1px solid transparent;
+               border-top-left-radius: 10px; border-top-right-radius: 10px; }}
+QTabBar::tab:!selected {{ margin-top: 8px; }}
+QTabBar::tab:!selected:hover {{ background: {c['hover']}; color: {c['text']}; }}
+QTabBar::tab:selected {{ background: {c['bg']}; color: {c['text']}; }}
+QToolButton#tabclose {{ padding: 3px; border-radius: 9px; }}
+QToolButton#tabclose:hover {{ background: {c['tab_sep']}; }}
+QToolButton#tabplus {{ padding: 6px; border-radius: 9px; margin: 6px 2px 0 4px; }}
+QToolButton#tabplus:hover {{ background: {c['hover']}; }}
 
 QListWidget {{ background: {c['bg']}; border: none; outline: none; padding: 8px; }}
 QListWidget::item {{ border-radius: 10px; padding: 8px; color: {c['muted']}; }}

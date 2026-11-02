@@ -26,7 +26,7 @@ App Windows chỉnh sửa trang PDF (xóa, thêm, sắp xếp, xoay) với giao 
   - `save_worker.py`: luồng nền ghi file.
   - `features/`: **mỗi chức năng một file**, là mixin của `MainWindow`:
     `ui_setup` (menu/toolbar/phím tắt/chuột phải), `page_model`, `history` (undo/redo), `thumbnails`, `preview`,
-    `file_open`, `file_save`, `extract`, `file_drop`, `page_delete`, `page_insert`, `page_move`, `page_rotate`,
+    `tabs`, `file_open`, `file_save`, `extract`, `file_drop`, `page_delete`, `page_insert`, `page_clipboard`, `page_move`, `page_rotate`,
     `language` (menu Ngôn ngữ, đổi ngay bằng `retranslate()`).
   - `i18n/`: `tr(khóa, **tham_số)`; mỗi ngôn ngữ một file từ điển (`vi.py` gốc/dự phòng, `en.py`, `zh_TW.py`); lựa chọn lưu bằng QSettings.
   - `theme.py` (màu + stylesheet), `icons.py` (biểu tượng SVG).
@@ -65,6 +65,10 @@ App Windows chỉnh sửa trang PDF (xóa, thêm, sắp xếp, xoay) với giao 
 - [x] Kéo file PDF từ Explorer: thả lên lưới thumbnail thì chèn đúng vị trí dưới con trỏ (vạch xanh chỉ chỗ thả, tự cuộn gần mép, bỏ qua file không phải PDF); thả chỗ khác trong cửa sổ thì chèn cuối; chưa mở file nào thì mở file đầu. Logic ở `PageList` (tín hiệu `files_dropped`) + `FileDropMixin.drop_pdfs`; `viewport().setAcceptDrops(True)` là bắt buộc. Test trong `test_frontend.py`.
 - [x] Làm đẹp giao diện: `frontend/theme.py` (bảng màu sáng/tối theo hệ thống + stylesheet Fusion, gọi `apply_theme(app)` trong `main.py`), `frontend/icons.py` (biểu tượng SVG nội tuyến cho action, icon app), thẻ thumbnail bo góc có viền trang, khung gợi ý kéo-thả khi chưa có trang (khóa `list.empty`). `act(..., icon_name=)` gắn biểu tượng. Chưa xem được chữ thật vì ảnh chụp offscreen thiếu font.
 - [x] Tạo trình cài đặt bằng Inno Setup (`installer/`, `build_installer.bat`): cài per-user, lối tắt Start Menu/Desktop, tự có `unins000.exe` + mục Apps & features, gỡ xóa luôn thư mục cài và khóa QSettings. `build_exe.bat` thêm `--icon`. Đã thử cài/gỡ im lặng vào thư mục tạm: đúng. Giao diện wizard Inno đang là tiếng Anh.
+
+- [x] Tab: mở nhiều PDF cùng lúc, mỗi file một tab (`features/tabs.py`, `frontend/tab_bar.py` = `TabBar` kiểu Chrome: dải tab tối hơn nền, tab đang chọn sáng bằng vùng nội dung bên dưới, favicon trang PDF, nút đóng ✕ riêng + đóng bằng chuột giữa, nút "+" mở thêm file; màu `tab_strip`/`tab_sep` + kiểu trong `theme.py`). Trạng thái đang làm việc vẫn nằm ở `MainWindow` (`docs/path/dirty/undo/redo`); đổi tab thì `_stash()` cất vào `_tab_states` và `_activate()` nạp tab mới (xóa cache thumbnail + clipboard vì chỉ số nguồn chỉ đúng trong từng tab). Mở file đã có thì chuyển tab; Mở chọn được nhiều file; Ctrl+W đóng tab, Ctrl+Tab / Ctrl+Shift+Tab chuyển tab; nút Trang chủ = đóng tab hiện tại; đóng cửa sổ hỏi một lần nếu có tab chưa lưu. `load_pdf` vẫn là 'thay nội dung tab hiện tại'.
+
+- [x] Sao chép/Dán trang dán được sang tab khác: clipboard (`page_clipboard.py`) không giữ `src` (chỉ số trong `self.docs` của tab, vô nghĩa ở tab khác) mà giữ đường dẫn file nguồn (`fitz.Document.name`); lúc dán, mở lại file đó trong tab đích nếu chưa có. Vì vậy clipboard không còn bị xóa khi đổi tab (`tabs.py` bỏ `clear_page_clipboard()` ở `_activate`); chỉ mất hiệu lực đúng phần trỏ tới một file khi Lưu ghi đè chính file đó (`invalidate_clipboard_path`, gọi từ `file_save.py`).
 
 ### Chưa làm / ý tưởng
 - Chưa thử giao diện thật bằng tay (kéo-thả thumbnail chỉ mới viết, chưa kiểm tra trực quan).

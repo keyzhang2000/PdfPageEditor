@@ -59,6 +59,7 @@ class FileSaveMixin:
             self.docs = []
             os.replace(tmp, path)
             doc = open_pdf(path)
+            self.invalidate_clipboard_path(path)   # nội dung file tại path đã đổi: trang clipboard trỏ tới đó hết hiệu lực
         except Exception as ex:
             self.set_busy(False)
             if os.path.exists(tmp):
@@ -71,7 +72,6 @@ class FileSaveMixin:
         self.undo_stack.clear()
         self.redo_stack.clear()
         self.clear_thumb_cache()
-        self.clear_page_clipboard()
         for i, e in enumerate(pdf_entries(0, self.list.count())):
             self.list.item(i).setData(Qt.UserRole, e)
         self.dirty = False

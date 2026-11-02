@@ -1,8 +1,8 @@
 """Cửa sổ chính: chỉ ghép các chức năng (frontend/features/) lại với nhau."""
 from collections import deque
 
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import QLabel, QMainWindow, QSplitter
+from PySide6.QtCore import QSize, Qt, QTimer
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QMainWindow, QSplitter, QToolButton, QVBoxLayout, QWidget
 
 from .features.language import LanguageMixin
 from .features.extract import ExtractMixin
@@ -17,16 +17,19 @@ from .features.page_model import PageModelMixin
 from .features.page_move import PageMoveMixin
 from .features.page_rotate import PageRotateMixin
 from .features.preview import PreviewMixin
+from .features.tabs import TabsMixin
 from .features.thumbnails import ThumbnailMixin
 from .features.ui_setup import UiSetupMixin
 from .i18n import load_saved_language, tr
+from .icons import icon
+from .tab_bar import TabBar
 from .page_list import PageList
 from .preview_view import PreviewScroll
 
 
 class MainWindow(
     UiSetupMixin, LanguageMixin, PageModelMixin, HistoryMixin, ThumbnailMixin, PreviewMixin,
-    FileOpenMixin, FileSaveMixin, ExtractMixin, FileDropMixin,
+    TabsMixin, FileOpenMixin, FileSaveMixin, ExtractMixin, FileDropMixin,
     PageDeleteMixin, PageInsertMixin, PageClipboardMixin, PageMoveMixin, PageRotateMixin,
     QMainWindow,
 ):
@@ -36,6 +39,10 @@ class MainWindow(
         self.resize(1200, 760)
         self.setAcceptDrops(True)
 
+        self._tab_states = {}   # id tab -> trạng thái đã cất của tab (tab đang mở thì trạng thái nằm ở các thuộc tính dưới)
+        self._tab_id = None
+        self._next_tab_id = 0
+        self._switching = False
         self.docs = []          # danh sách fitz.Document nguồn
         self.path = None        # file đang mở
         self.dirty = False
@@ -73,7 +80,30 @@ class MainWindow(
         split.addWidget(self.preview_scroll)
         split.setStretchFactor(0, 3)
         split.setStretchFactor(1, 2)
-        self.setCentralWidget(split)
+        self.tabbar = TabBar()
+        self.tabbar.currentChanged.connect(self.on_tab_changed)
+        self.tabbar.close_requested.connect(self.close_tab)
+        self.tab_plus = QToolButton()        # "+" cạnh tab cuối: mở thêm file
+        self.tab_plus.setObjectName("tabplus")
+        self.tab_plus.setIcon(icon("plus"))
+        self.tab_plus.setIconSize(QSize(14, 14))
+        self.tab_plus.clicked.connect(self.open_file)
+        self.tab_strip = QWidget()
+        self.tab_strip.setObjectName("tabstrip")
+        self.tab_strip.setVisible(False)     # chỉ hiện khi có file mở
+        strip = QHBoxLayout(self.tab_strip)
+        strip.setContentsMargins(8, 0, 8, 0)
+        strip.setSpacing(2)
+        strip.addWidget(self.tabbar)
+        strip.addWidget(self.tab_plus)
+        strip.addStretch(1)
+        central = QWidget()
+        lay = QVBoxLayout(central)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(0)
+        lay.addWidget(self.tab_strip)
+        lay.addWidget(split, 1)
+        self.setCentralWidget(central)
         split.splitterMoved.connect(lambda *_: self.preview_timer.start())   # kéo thanh chia → vẽ lại vừa khung
 
         self.zoom_timer = QTimer(self)       # gộp nhiều nấc lăn chuột thành một lần vẽ lại

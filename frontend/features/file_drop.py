@@ -12,19 +12,17 @@ class FileDropMixin:
         self.drop_pdfs(PageList.pdf_paths(ev.mimeData()), None)
 
     def drop_pdfs(self, paths, row):
-        """Chưa mở file nào thì mở file đầu; còn lại chèn tại `row` (None = cuối danh sách)."""
+        """Chưa mở file nào thì mỗi file mở một tab; còn lại chèn tại `row` (None = cuối danh sách)."""
         if not paths:
             return
         if not self.docs:
-            if not self.confirm_discard():
-                return
-            self.load_pdf(paths[0])
-            paths, row = paths[1:], None
-        if paths and self.docs:
+            for p in paths:
+                self.open_pdf_tab(p)
+        else:
             self.insert_pdf(paths=paths, row=self.list.count() if row is None else row)
 
     def closeEvent(self, ev):
-        if self.confirm_discard():
+        if self.confirm_discard(self._all_dirty()):
             ev.accept()
         else:
             ev.ignore()

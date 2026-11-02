@@ -11,6 +11,9 @@ STRINGS = {
     # hành động
     "act.home": "Trang chủ",
     "act.open": "Mở",
+    "act.close_tab": "Đóng tab",
+    "act.next_tab": "Tab kế tiếp",
+    "act.prev_tab": "Tab trước",
     "act.saveas": "Lưu thành...",
     "act.quit": "Thoát",
     "act.delete": "Xóa trang",
@@ -65,6 +68,7 @@ STRINGS = {
     "err.save": "Không lưu được:\n{err}",
     "err.extract": "Không xuất được:\n{err}",
     "err.insert": "Không chèn được {name}:\n{err}",
+    "err.paste": "Không dán được một số trang (file nguồn không mở được): {name}\n{err}",
     "err.no_pages": "PDF không có trang nào để lưu.",
     "err.password": "File được bảo vệ bằng mật khẩu.",
     "err.unknown": "lỗi không xác định",

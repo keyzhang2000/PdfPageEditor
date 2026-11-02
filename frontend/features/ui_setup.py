@@ -49,6 +49,9 @@ class UiSetupMixin:
         self.a_home = self.act("act.home", self.go_home, "Alt+Home", icon_name="home")
         self.a_open = self.act("act.open", self.open_file, "Ctrl+O", icon_name="open")
         self.a_saveas = self.act("act.saveas", self.save_as, "Ctrl+S", icon_name="saveas")
+        self.a_close_tab = self.act("act.close_tab", self.close_tab, "Ctrl+W", icon_name="quit")
+        self.a_next_tab = self.act("act.next_tab", lambda: self.step_tab(1), "Ctrl+Tab", icon_name="move_r")
+        self.a_prev_tab = self.act("act.prev_tab", lambda: self.step_tab(-1), "Ctrl+Shift+Tab", icon_name="move_l")
         self.a_delete = self.act("act.delete", self.delete_selected, "Delete", icon_name="delete")
         self.a_ins_pdf = self.act("act.ins_pdf_after", lambda: self.insert_pdf(after=True), "Ctrl+I",
                                   "tip.ins_pdf", icon_name="ins_pdf")
@@ -73,6 +76,8 @@ class UiSetupMixin:
         m = self.menuBar()
         f = self.add_menu(m, "menu.file")
         f.addActions([self.a_home, self.a_open, self.a_saveas])
+        f.addSeparator()
+        f.addActions([self.a_close_tab, self.a_next_tab, self.a_prev_tab])
         f.addSeparator()
         f.addAction(self.act("act.quit", self.close, "Ctrl+Q", icon_name="quit"))
         e = self.add_menu(m, "menu.edit")
