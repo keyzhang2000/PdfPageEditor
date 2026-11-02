@@ -13,5 +13,6 @@ class PageRotateMixin:
             e = rotated(it.data(Qt.UserRole), deg)
             it.setData(Qt.UserRole, e)
             self.set_thumbnail(it, self.render_entry(e, self.thumb_scale))
-        self.list.doItemsLayout()   # kích thước thẻ đổi (ngang <-> dọc): xếp lại để không đè lên trang bên cạnh
+        if self.icon_size() != self.list.iconSize():   # hướng trang đổi làm ô lớn nhất đổi: dựng lại thumbnail
+            self.start_rendering()
         self.update_preview()

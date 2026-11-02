@@ -29,7 +29,7 @@ class PageList(QListWidget):
         self.empty_text = ""        # chữ gợi ý khi chưa có trang nào
         self.setSpacing(10)
         self.setWordWrap(True)
-        self.setUniformItemSizes(False)
+        self.setUniformItemSizes(True)
         self.setMouseTracking(False)
         self._scroll_timer = QTimer(self)
         self._scroll_timer.setInterval(30)

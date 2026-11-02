@@ -55,16 +55,25 @@ class ThumbnailMixin:
 
     def start_rendering(self):
         self.pending = deque(self.list.item(i) for i in range(self.list.count()))
-        self.list.setIconSize(self.icon_size())
+        self.apply_icon_size()
         self.render_timer.start()
+
+    def apply_icon_size(self):
+        # Ô lưới cố định theo trang lớn nhất: kích thước từng item không còn tự tính nên không bị đè lên nhau.
+        s = self.icon_size()
+        self.list.setIconSize(s)
+        grid = QSize(s.width() + 36, s.height() + 56)
+        self.list.setGridSize(grid)
+        for i in range(self.list.count()):   # nếu không, thẻ lấy cỡ của trang đầu và cắt trang rộng hơn
+            self.list.item(i).setSizeHint(grid)
 
     def icon_size(self):
         mw = mh = 0
         for i in range(self.list.count()):
-            w, h = self.page_size(self.list.item(i).data(Qt.UserRole))
+            w, h = displayed_size(self.docs, self.list.item(i).data(Qt.UserRole))
             mw, mh = max(mw, w), max(mh, h)
         s = self.thumb_scale
-        return QSize(max(int(max(mw, mh) * s), 40), max(int(max(mw, mh) * s), 40))
+        return QSize(max(int(mw * s), 40), max(int(mh * s), 40))
 
     def render_next(self):
         for _ in range(4):
@@ -78,8 +87,17 @@ class ThumbnailMixin:
                 continue
             self.set_thumbnail(it, self.render_entry(e, self.thumb_scale))
 
-    @staticmethod
-    def set_thumbnail(it, pm):
+    def set_thumbnail(self, it, pm):
+        # Đặt trang vào ô vuông cố định, canh giữa cả ngang lẫn dọc để các trang khác kích thước thẳng hàng.
+        size = self.list.iconSize()
+        if pm.width() < size.width() or pm.height() < size.height():
+            canvas = QPixmap(max(size.width(), pm.width()), max(size.height(), pm.height()))
+            canvas.fill(Qt.transparent)
+            p = QPainter(canvas)
+            p.drawPixmap((canvas.width() - pm.width()) // 2, (canvas.height() - pm.height()) // 2, pm)
+            p.end()
+            pm = canvas
+        it.setSizeHint(self.list.gridSize())
         ic = QIcon(pm)
         ic.addPixmap(pm, QIcon.Selected)   # không phủ màu xanh lên ảnh khi chọn (đã có nền thẻ)
         it.setIcon(ic)

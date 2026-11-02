@@ -137,5 +137,7 @@ class UiSetupMixin:
         menu.addSeparator()
         menu.addActions([self.a_move_l, self.a_move_r, self.a_move_to])
         menu.addSeparator()
+        menu.addAction(self.a_extract)
+        menu.addSeparator()
         menu.addActions([self.a_ins_pdf_b, self.a_ins_pdf, self.a_ins_blank_b, self.a_ins_blank])
         menu.exec(self.list.mapToGlobal(pos))

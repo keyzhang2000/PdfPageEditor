@@ -2,7 +2,6 @@
 import os
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QListWidgetItem
 
 from ..i18n import tr
@@ -16,7 +15,7 @@ class PageModelMixin:
         it = QListWidgetItem()
         it.setData(Qt.UserRole, entry)
         it.setTextAlignment(Qt.AlignHCenter)
-        it.setIcon(QIcon(self.placeholder(entry)))
+        self.set_thumbnail(it, self.placeholder(entry))
         return it
 
     def renumber(self):
