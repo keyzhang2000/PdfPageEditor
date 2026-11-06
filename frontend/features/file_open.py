@@ -27,7 +27,7 @@ class FileOpenMixin:
             self.open_pdf_tab(path)
 
     def go_home(self):
-        """Đóng tab hiện tại; hết tab thì về màn hình chính (khung gợi ý mở / kéo-thả file)."""
+        """Đóng tab hiện tại; chỉ còn 1 tab thì tab đó trở lại Trang chủ (khung gợi ý mở / kéo-thả file)."""
         if self.docs:
             self.close_tab()
 

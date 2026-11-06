@@ -12,7 +12,8 @@ class FileDropMixin:
         self.drop_pdfs(PageList.pdf_paths(ev.mimeData()), None)
 
     def drop_pdfs(self, paths, row):
-        """Chưa mở file nào thì mỗi file mở một tab; còn lại chèn tại `row` (None = cuối danh sách)."""
+        """Đang ở Trang chủ (chưa có file) thì mở từng file một tab (file đầu nạp vào tab Trang chủ);
+        còn lại chèn tại `row` (None = cuối danh sách)."""
         if not paths:
             return
         if not self.docs:

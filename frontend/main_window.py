@@ -83,14 +83,13 @@ class MainWindow(
         self.tabbar = TabBar()
         self.tabbar.currentChanged.connect(self.on_tab_changed)
         self.tabbar.close_requested.connect(self.close_tab)
-        self.tab_plus = QToolButton()        # "+" cạnh tab cuối: mở thêm file
+        self.tab_plus = QToolButton()        # "+" cạnh tab cuối: mở tab Trang chủ mới
         self.tab_plus.setObjectName("tabplus")
         self.tab_plus.setIcon(icon("plus"))
         self.tab_plus.setIconSize(QSize(14, 14))
-        self.tab_plus.clicked.connect(self.open_file)
+        self.tab_plus.clicked.connect(self.new_tab)
         self.tab_strip = QWidget()
         self.tab_strip.setObjectName("tabstrip")
-        self.tab_strip.setVisible(False)     # chỉ hiện khi có file mở
         strip = QHBoxLayout(self.tab_strip)
         strip.setContentsMargins(8, 0, 8, 0)
         strip.setSpacing(2)
@@ -122,4 +121,5 @@ class MainWindow(
         self.render_timer.timeout.connect(self.render_next)
 
         self.build_actions()
+        self._init_home_tab()
         self.update_status()

@@ -8,10 +8,16 @@ from backend.pdf_io import open_pdf
 
 from ..errors import error_text
 from ..i18n import tr
+from ..icons import icon
 
 
 def _same_file(a, b):
     return bool(a) and bool(b) and os.path.normcase(os.path.abspath(a)) == os.path.normcase(os.path.abspath(b))
+
+
+def _home_state():
+    """Trạng thái tab Trang chủ: chưa có file nào, chỉ hiện khung gợi ý mở/kéo-thả."""
+    return dict(docs=[], path=None, dirty=False, undo=[], redo=[], entries=[], sel=[])
 
 
 class TabsMixin:
@@ -41,34 +47,56 @@ class TabsMixin:
         self.undo_stack, self.redo_stack = st["undo"], st["redo"]
         self.clear_thumb_cache()          # chỉ số nguồn (src) chỉ có nghĩa trong từng tab
         self.load_snapshot(st["entries"], st["sel"])
-        self.update_status()
-
-    def _show_empty(self):
-        self.render_timer.stop()
-        self.pending.clear()
-        self.docs, self.path, self.dirty = [], None, False
-        self.undo_stack, self.redo_stack = [], []
-        self.clear_thumb_cache()
-        self.load_snapshot([])
-        self.preview.clear()
-        self.preview.setText(tr("preview.empty"))
-        self.tab_strip.setVisible(False)
+        if not self.docs:                 # tab Trang chủ: hiện lại khung gợi ý mở/kéo-thả
+            self.preview.clear()
+            self.preview.setText(tr("preview.empty"))
         self.update_status()
 
     # ----- thao tác với tab -----
-    def _add_tab(self, doc, path):
+    def _init_home_tab(self):
+        """Gọi một lần lúc khởi động: luôn có sẵn 1 tab Trang chủ."""
+        tid = self._next_tab_id
+        self._next_tab_id += 1
+        self._tab_states[tid] = _home_state()
+        idx = self.tabbar.add_document(tr("tab.home"), "home")
+        self.tabbar.setTabData(idx, tid)
+        self._tab_id = tid
+
+    def new_tab(self):
+        """Nút "+": mở tab Trang chủ mới, chưa gắn file nào."""
         self._stash()
         tid = self._next_tab_id
         self._next_tab_id += 1
+        st = _home_state()
+        self._tab_states[tid] = st
+        self._switching = True
+        idx = self.tabbar.add_document(tr("tab.home"), "home")
+        self.tabbar.setTabData(idx, tid)
+        self.tabbar.setCurrentIndex(idx)
+        self._switching = False
+        self._tab_id = tid
+        self._activate(st)
+
+    def _add_tab(self, doc, path):
         st = dict(docs=[doc], path=path, dirty=False, undo=[], redo=[],
                   entries=pdf_entries(0, len(doc)), sel=[])
+        if self._tab_id is not None and not self.docs:    # tab hiện tại là Trang chủ: nạp file vào đây luôn
+            idx = self._tab_index(self._tab_id)
+            self._tab_states[self._tab_id] = st
+            self.tabbar.setTabIcon(idx, icon("pdffile"))
+            self.tabbar.setTabText(idx, os.path.basename(path))
+            self.tabbar.setTabToolTip(idx, path)
+            self._activate(st)
+            return
+        self._stash()
+        tid = self._next_tab_id
+        self._next_tab_id += 1
         self._tab_states[tid] = st
         self._switching = True
         idx = self.tabbar.add_document(os.path.basename(path))
         self.tabbar.setTabData(idx, tid)
         self.tabbar.setCurrentIndex(idx)
         self._switching = False
-        self.tab_strip.setVisible(True)
         self._tab_id = tid
         self._activate(st)
 
@@ -105,10 +133,20 @@ class TabsMixin:
         if is_cur:
             self._stash()
         st = self._tab_states[tid]
+        if not st["docs"] and self.tabbar.count() == 1:
+            return                          # chỉ còn tab Trang chủ: không có gì để đóng
         if not self.confirm_discard(st["dirty"]):
             return
         for d in st["docs"]:
             d.close()
+        if self.tabbar.count() == 1:        # tab cuối cùng: biến thành Trang chủ, luôn giữ ít nhất 1 tab
+            home = _home_state()
+            self._tab_states[tid] = home
+            self.tabbar.setTabIcon(idx, icon("home"))
+            self.tabbar.setTabText(idx, tr("tab.home"))
+            self.tabbar.setTabToolTip(idx, "")
+            self._activate(home)
+            return
         del self._tab_states[tid]
         self._switching = True
         self.tabbar.removeTab(idx)
@@ -117,11 +155,8 @@ class TabsMixin:
             return
         self._tab_id = None
         cur = self.tabbar.currentIndex()
-        if cur < 0:
-            self._show_empty()
-        else:
-            self._tab_id = self.tabbar.tabData(cur)
-            self._activate(self._tab_states[self._tab_id])
+        self._tab_id = self.tabbar.tabData(cur)
+        self._activate(self._tab_states[self._tab_id])
 
     def step_tab(self, delta):
         n = self.tabbar.count()

@@ -8,6 +8,7 @@ STRINGS = {
     "toolbar.main": "Main",
     "label.zoom": " Zoom: ",
     "act.home": "Home",
+    "tab.home": "Home",
     "act.open": "Open",
     "act.close_tab": "Close tab",
     "act.next_tab": "Next tab",

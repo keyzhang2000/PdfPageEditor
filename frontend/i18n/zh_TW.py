@@ -8,6 +8,7 @@ STRINGS = {
     "toolbar.main": "主要",
     "label.zoom": " 縮放：",
     "act.home": "首頁",
+    "tab.home": "首頁",
     "act.open": "開啟",
     "act.close_tab": "關閉分頁",
     "act.next_tab": "下一個分頁",

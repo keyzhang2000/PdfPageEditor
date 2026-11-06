@@ -96,6 +96,18 @@ texts = [w.docs[e["src"]][e["page"]].get_text().strip() for e in w.snapshot()]
 assert texts == ["A1", "B1", "A2", "A3", "A4", "A5"], texts
 print("dán sang tab khác OK")
 
+# ---- mặc định luôn có 1 tab Trang chủ; nút "+" mở thêm tab Trang chủ ----
+w = MainWindow()
+assert not w.tab_strip.isHidden() and w.tabbar.count() == 1 and w.tabbar.tabText(0) == i18n.tr("tab.home")
+assert w.docs == [] and w.path is None
+w.new_tab()
+assert w.tabbar.count() == 2 and w.tabbar.tabText(1) == i18n.tr("tab.home")
+w.load_pdf(a)                                           # nạp file vào tab Trang chủ đang mở, không tạo thêm tab
+assert w.tabbar.count() == 2 and w.list.count() == 7
+w.close_tab()
+assert w.tabbar.count() == 1
+print("tab Trang chủ mặc định OK")
+
 # ---- màn hình chính: đóng file, quay về trạng thái ban đầu ----
 w = MainWindow()
 w.load_pdf(a)
@@ -127,9 +139,12 @@ w.close_tab(1); assert w.tabbar.count() == 2           # không đồng ý thì 
 w.confirm_discard = lambda dirty=None: True
 w.close_tab(1)
 assert w.tabbar.count() == 1 and w.path == a and w.list.count() == 7
-w.close_tab(0)
-assert w.docs == [] and w.path is None and w.list.count() == 0 and not w.tab_strip.isVisible()
-w.drop_pdfs([a, b], None)                               # màn hình chính: mỗi file một tab
+w.close_tab(0)                                          # tab cuối cùng: trở lại Trang chủ, không mất thanh tab
+assert w.docs == [] and w.path is None and w.list.count() == 0
+assert not w.tab_strip.isHidden() and w.tabbar.count() == 1
+w.close_tab(0)                                          # đang ở Trang chủ: không có gì để đóng
+assert w.tabbar.count() == 1
+w.drop_pdfs([a, b], None)                               # Trang chủ: file đầu nạp vào đây, file sau mở tab mới
 assert w.tabbar.count() == 2
 print("tab OK")
 

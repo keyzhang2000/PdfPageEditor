@@ -18,8 +18,8 @@ class TabBar(QTabBar):
         self.setUsesScrollButtons(True)
         self.setIconSize(QSize(16, 16))
 
-    def add_document(self, text):
-        idx = self.addTab(icon("pdffile"), text)
+    def add_document(self, text, icon_name="pdffile"):
+        idx = self.addTab(icon(icon_name), text)
         btn = QToolButton()
         btn.setObjectName("tabclose")
         btn.setIcon(icon("close"))

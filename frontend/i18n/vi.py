@@ -10,6 +10,7 @@ STRINGS = {
     "label.zoom": " Thu phóng: ",
     # hành động
     "act.home": "Trang chủ",
+    "tab.home": "Trang chủ",
     "act.open": "Mở",
     "act.close_tab": "Đóng tab",
     "act.next_tab": "Tab kế tiếp",

@@ -32,4 +32,9 @@ class LanguageMixin:
         self.list.viewport().update()
         if not self.docs:
             self.preview.setText(tr("preview.empty"))
+        for i in range(self.tabbar.count()):
+            tid = self.tabbar.tabData(i)
+            docs = self.docs if tid == self._tab_id else self._tab_states[tid]["docs"]
+            if not docs:
+                self.tabbar.setTabText(i, tr("tab.home"))
         self.update_status()
