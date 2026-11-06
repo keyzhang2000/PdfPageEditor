@@ -40,6 +40,17 @@ def rotated(entry, deg):
 
 
 def dest_for_position(rows, count, pos):
-    """Vị trí chèn (trước khi gỡ các trang) để trang chọn đầu tiên nằm ở vị trí `pos` (1..count)."""
+    """Vị trí chèn (trước khi gỡ các trang) để trang chọn đầu tiên nằm ở vị trí `pos` (1..count).
+
+    O(count + len(rows)) bằng con trỏ quét dần trên `rows` đã sắp xếp,
+    thay vì quét lại toàn bộ `rows` cho mỗi `d` (O(count * len(rows)))."""
     final = pos - 1
-    return next(d for d in range(count + 1) if d - sum(1 for r in rows if r < d) == final)
+    rows = sorted(rows)
+    removed, r = 0, 0
+    for d in range(count + 1):
+        while r < len(rows) and rows[r] < d:
+            r += 1
+            removed += 1
+        if d - removed == final:
+            return d
+    raise ValueError("vị trí không hợp lệ")

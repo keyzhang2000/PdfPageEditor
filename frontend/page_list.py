@@ -37,17 +37,27 @@ class PageList(QListWidget):
 
     # ----- tính toán vị trí / di chuyển -----
     def drop_row_at(self, pos):
-        """Vị trí chèn (0..count) gần con trỏ nhất."""
-        best, best_d = None, None
+        """Vị trí chèn (0..count) gần con trỏ nhất.
+
+        Chuột thường ở ngay trên một trang trong lúc kéo: dùng `indexAt` (tra cứu O(1)
+        của Qt) cho trường hợp đó thay vì so khoảng cách với tất cả trang (O(n), vừa
+        chạy ở Python vừa gọi Qt cho từng trang) — chỉ quét toàn bộ khi con trỏ rơi vào
+        khe trống (dưới hàng cuối, hoặc cuối một hàng chưa đầy)."""
+        if self.count() == 0:
+            return 0
+        idx = self.indexAt(pos)
+        best = idx.row() if idx.isValid() else self._nearest_row(pos)
+        return best + (1 if pos.x() > self.visualItemRect(self.item(best)).center().x() else 0)
+
+    def _nearest_row(self, pos):
+        best, best_d = 0, None
         for r in range(self.count()):
             c = self.visualItemRect(self.item(r)).center()
             # Ưu tiên cùng hàng: lệch dọc được nhân trọng số lớn.
             d = (pos.x() - c.x()) ** 2 + 4 * (pos.y() - c.y()) ** 2
             if best_d is None or d < best_d:
                 best, best_d = r, d
-        if best is None:
-            return 0
-        return best + (1 if pos.x() > self.visualItemRect(self.item(best)).center().x() else 0)
+        return best
 
     def move_rows(self, rows, dest):
         rows = sorted(rows)

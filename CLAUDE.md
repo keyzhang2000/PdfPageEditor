@@ -70,6 +70,12 @@ App Windows chỉnh sửa trang PDF (xóa, thêm, sắp xếp, xoay) với giao 
 
 - [x] Sao chép/Dán trang dán được sang tab khác: clipboard (`page_clipboard.py`) không giữ `src` (chỉ số trong `self.docs` của tab, vô nghĩa ở tab khác) mà giữ đường dẫn file nguồn (`fitz.Document.name`); lúc dán, mở lại file đó trong tab đích nếu chưa có. Vì vậy clipboard không còn bị xóa khi đổi tab (`tabs.py` bỏ `clear_page_clipboard()` ở `_activate`); chỉ mất hiệu lực đúng phần trỏ tới một file khi Lưu ghi đè chính file đó (`invalidate_clipboard_path`, gọi từ `file_save.py`).
 
+### 2026-11-06
+- [x] Tối ưu thuật toán/cấu trúc dữ liệu cho tốc độ kéo-thả trang:
+  - `PageList.drop_row_at` (frontend/page_list.py): trước đây quét toàn bộ trang và gọi `visualItemRect()` cho từng trang mỗi lần chuột di chuyển trong lúc kéo (Qt tính lại layout mỗi lần gọi → thực chất O(n²), không chỉ O(n)). Đổi sang `indexAt()` (tra cứu O(1) có sẵn của Qt) cho trường hợp phổ biến (con trỏ đang trên một trang); chỉ quét toàn bộ (đổi tên `_nearest_row`) khi con trỏ rơi vào khe trống (dưới hàng cuối/cuối hàng chưa đầy). Đo với 3000 trang, 2000 lần gọi: 11.47s → 0.007s.
+  - `dest_for_position` (backend/entries.py): trước đây O(count × số trang chọn) do đếm lại `rows` cho mỗi vị trí `d`; đổi sang con trỏ quét một lần trên `rows` đã sắp xếp, O(count + số trang chọn).
+  - Test cũ (`test_backend.py`, `test_frontend.py`, `test_i18n.py`) vẫn qua không đổi hành vi.
+
 ### Chưa làm / ý tưởng
 - Chưa thử giao diện thật bằng tay (kéo-thả thumbnail chỉ mới viết, chưa kiểm tra trực quan).
 - Chưa build thử .exe; chưa hỗ trợ PDF có mật khẩu.
